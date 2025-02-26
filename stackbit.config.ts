@@ -1,38 +1,42 @@
-import { defineStackbitConfig, SiteMapEntry } from "@stackbit/types";
+import { defineStackbitConfig } from "@stackbit/types";
 import { GitContentSource } from "@stackbit/cms-git";
 
 export default defineStackbitConfig({
   contentSources: [
     new GitContentSource({
       rootPath: __dirname,
-      contentDirs: ["content"],  // Aquí indicas la carpeta donde está el contenido
+      contentDirs: ["content"], // Aquí indicas la carpeta donde está el contenido
       models: [
         {
-          name: "Page",  // Nombre del modelo
-          type: "page",  // Tipo de contenido
-          urlPath: "/{slug}",  // Define la URL para cada página
-          filePath: "content/pages/{slug}.json",  // Ruta a los archivos de contenido
-          fields: [{ name: "title", type: "string", required: true }]  // Campos requeridos
+          name: "Page", // Modelo para las páginas estándar
+          type: "page",
+          urlPath: "/{slug}",
+          filePath: "content/pages/{slug}.json",
+          fields: [{ name: "title", type: "string", required: true }]
+        },
+        {
+          name: "BlogPost", // Modelo para las entradas del blog
+          type: "blog", // Asume que es tipo "blog" o cualquier otro tipo
+          urlPath: "/blog/{slug}",
+          filePath: "content/blog/{slug}.json", // Ajusta la ruta según donde estén los posts
+          fields: [
+            { name: "title", type: "string", required: true },
+            { name: "content", type: "text", required: true },
+            // Añade más campos según lo que necesites
+          ]
+        },
+        {
+          name: "Project", // Modelo para proyectos
+          type: "project", // Similar a blog pero para proyectos
+          urlPath: "/projects/{slug}",
+          filePath: "content/projects/{slug}.json", // Ajusta según la estructura de tu contenido
+          fields: [
+            { name: "title", type: "string", required: true },
+            { name: "description", type: "text", required: true },
+            // Añade más campos aquí
+          ]
         }
       ]
     })
-  ],
-  siteMap: ({ documents, models }) => {
-    // Filtra solo los modelos de tipo "page"
-    const pageModels = models.filter((m) => m.type === "page");
-
-    return documents
-      .filter((d) => pageModels.some(m => m.name === d.modelName)) // Filtra los documentos tipo página
-      .map((document) => {
-        const urlModel = document.modelName === "Page" ? 'page' : null;
-
-        return {
-          stableId: document.id,
-          urlPath: `/${urlModel}/${document.id}`,  // Define la URL de cada página
-          document,
-          isHomePage: false,
-        };
-      })
-      .filter(Boolean) as SiteMapEntry[];
-  }
+  ]
 });
