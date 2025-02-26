@@ -1,40 +1,44 @@
-import { defineStackbitConfig } from "@stackbit/types";
+import { defineStackbitConfig, SiteMapEntry } from "@stackbit/types";
 import { GitContentSource } from "@stackbit/cms-git";
 
 export default defineStackbitConfig({
   contentSources: [
     new GitContentSource({
-      rootPath: __dirname, // Asegúrate de que sea la ruta raíz correcta
-      contentDirs: ["src/blog", "src/projects", "src/tags"], // Cambié content por src si tus carpetas están allí
+      rootPath: __dirname, // Ruta raíz de tu proyecto
+      contentDirs: ["src/content/blog", "src/content/projects"],  // Las carpetas donde está el contenido
       models: [
         {
-          name: "Page",
-          type: "page",
-          urlPath: "/{slug}",
-          filePath: "src/pages/{slug}.json",
-          fields: [{ name: "title", type: "string", required: true }]
+          name: "Blog",
+          type: "page",  // El tipo de contenido es 'page'
+          urlPath: "/blog/{slug}",  // Las páginas del blog tendrán URLs como /blog/{slug}
+          filePath: "src/content/blog/{slug}.md",  // Define la ruta a los archivos de blog Markdown
+          fields: [{ name: "title", type: "string", required: true }]  // Definir el título como campo requerido
         },
         {
-          name: "BlogPost", // Modelo para los posts del blog
-          type: "blog",
-          urlPath: "/blog/{slug}",
-          filePath: "src/blog/{slug}.json", // Asegúrate de que esté en la carpeta correcta
-          fields: [
-            { name: "title", type: "string", required: true },
-            { name: "content", type: "text", required: true }
-          ]
-        },
-        {
-          name: "Project", // Modelo para proyectos
-          type: "project",
-          urlPath: "/projects/{slug}",
-          filePath: "src/projects/{slug}.json", // Asegúrate de que esté en la carpeta correcta
-          fields: [
-            { name: "title", type: "string", required: true },
-            { name: "description", type: "text", required: true }
-          ]
+          name: "Project",
+          type: "page",  // El tipo de contenido es 'page'
+          urlPath: "/projects/{slug}",  // Las páginas de los proyectos tendrán URLs como /projects/{slug}
+          filePath: "src/content/projects/{slug}.md",  // Define la ruta a los archivos de proyectos Markdown
+          fields: [{ name: "title", type: "string", required: true }]  // Definir el título como campo requerido
         }
       ]
     })
-  ]
+  ],
+  siteMap: ({ documents, models }) => {
+    const pageModels = models.filter((m) => m.type === "page");
+
+    return documents
+      .filter((d) => pageModels.some(m => m.name === d.modelName))
+      .map((document) => {
+        const urlModel = document.modelName === "Blog" ? 'blog' : 'project';
+
+        return {
+          stableId: document.id,
+          urlPath: `/${urlModel}/${document.id}`,  // URL para blog y proyectos
+          document,
+          isHomePage: false,
+        };
+      })
+      .filter(Boolean) as SiteMapEntry[];
+  }
 });
