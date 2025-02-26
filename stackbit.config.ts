@@ -4,36 +4,34 @@ import { GitContentSource } from "@stackbit/cms-git";
 export default defineStackbitConfig({
   contentSources: [
     new GitContentSource({
-      rootPath: __dirname,
-      contentDirs: ["content"], // Aquí indicas la carpeta donde está el contenido
+      rootPath: __dirname, // Asegúrate de que sea la ruta raíz correcta
+      contentDirs: ["src/blog", "src/projects", "src/tags"], // Cambié content por src si tus carpetas están allí
       models: [
         {
-          name: "Page", // Modelo para las páginas estándar
+          name: "Page",
           type: "page",
           urlPath: "/{slug}",
-          filePath: "content/pages/{slug}.json",
+          filePath: "src/pages/{slug}.json",
           fields: [{ name: "title", type: "string", required: true }]
         },
         {
-          name: "BlogPost", // Modelo para las entradas del blog
-          type: "blog", // Asume que es tipo "blog" o cualquier otro tipo
+          name: "BlogPost", // Modelo para los posts del blog
+          type: "blog",
           urlPath: "/blog/{slug}",
-          filePath: "content/blog/{slug}.json", // Ajusta la ruta según donde estén los posts
+          filePath: "src/blog/{slug}.json", // Asegúrate de que esté en la carpeta correcta
           fields: [
             { name: "title", type: "string", required: true },
-            { name: "content", type: "text", required: true },
-            // Añade más campos según lo que necesites
+            { name: "content", type: "text", required: true }
           ]
         },
         {
           name: "Project", // Modelo para proyectos
-          type: "project", // Similar a blog pero para proyectos
+          type: "project",
           urlPath: "/projects/{slug}",
-          filePath: "content/projects/{slug}.json", // Ajusta según la estructura de tu contenido
+          filePath: "src/projects/{slug}.json", // Asegúrate de que esté en la carpeta correcta
           fields: [
             { name: "title", type: "string", required: true },
-            { name: "description", type: "text", required: true },
-            // Añade más campos aquí
+            { name: "description", type: "text", required: true }
           ]
         }
       ]
